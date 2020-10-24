@@ -12,13 +12,13 @@ addQuestions x y = x ++ y
 
 preguntas :: [[String]] -> IO [[String]]
 preguntas lista = do
-    putStrLn $ "Enter something different from zero to add more questions"
+    putStrLn $ "Inserte + para insertar otra pregunta, o cualquier tro caracter para terminar preguntas"
     l <- getLine
-    if (l == "0") 
+    if (l /= "+") 
         then do
             return (lista)
         else do
-            putStrLn $ "inserte pregunta"
+            putStrLn $ "Inserte la pregunta"
             z <- recibir
             listaRespuestas <- respuestas []
             let lista2 = lista ++ [z] ++ [listaRespuestas]
@@ -26,17 +26,29 @@ preguntas lista = do
     
 respuestas :: [String] -> IO [String]
 respuestas lista = do
-    putStrLn $ "Enter something different from zero to add more answers"
+    putStrLn $ "Inserte + para insertar otra respuesta, o cualquier tro caracter para terminar respuesta"
     l <- getLine
-    if (l == "0") 
+    if (l /= "+") 
         then do
             return (lista)
         else do
-            putStrLn $ "inserte repuesta"
+            putStrLn $ "Inserte la respuesta"
             z <- recibir
             let lista2 = lista ++ z
             respuestas  lista2 
 
+encuestas :: [[[String]]] -> IO [[[String]]]
+encuestas lista = do
+    putStrLn $ "Inserte + para insertar otra encuesta, o cualquier tro caracter para terminar encuesta"
+    l <- getLine
+    if (l /= "+") 
+        then do
+            return (lista)
+        else do
+
+            listaRespuestas <- preguntas []
+            let lista2 = lista ++ [listaRespuestas]
+            encuestas  lista2 
 
 recibir :: IO [String]
 recibir = do
@@ -45,7 +57,7 @@ recibir = do
   
 main :: IO ()
 main = do
-    x <- preguntas []
+    x <- encuestas [[["el presidente es imbecil?"],["si","no"]]]
 
     print(x)
 
