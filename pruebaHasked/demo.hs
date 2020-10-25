@@ -1,4 +1,3 @@
-import Control.Monad (unless)
 --Obtener por teclado
 input :: String -> IO String
 input prompt = do
@@ -73,16 +72,64 @@ recibir :: IO [String]
 recibir = do
   x <- getLine
   return([x])
-  
+
+
+resPregunta :: [String] -> [String] -> IO [String]
+resPregunta enun opc = do
+    print(enun)
+    putStrLn "Digite el indice de alguna de las siguients opciones: "
+    print(opc)
+
+    res <- getLine
+    let numRes = read res :: Int
+    return([opc !! numRes])
+
+resEncuesta ::  [[String]] -> [String]-> Int -> IO [String]
+resEncuesta x y z= do
+    let pregunta = x!!0
+    let opciones = x!!1
+    respuesta <- resPregunta pregunta opciones
+    let lista = y ++ respuesta
+    let listaparametro = tail x
+    let listaparametro2 = tail listaparametro
+    if (listaparametro2 /= [])
+        then do
+            resEncuesta listaparametro2 lista z
+            else do
+                return (lista ++ [show z])
+
+resEncuestas :: [[[String]]] -> [[String]] -> IO [[String]] 
+resEncuestas x y = do 
+    putStrLn "Digite + para responder una encuesta"
+    condicion <- getLine
+    if(condicion == "+")
+        then do 
+            strnum <- getLine
+            let numencuesta = read strnum :: Int
+            let encuesta = x !! numencuesta
+            respuestas <- resEncuesta encuesta [] numencuesta
+            let listaparametros = y ++ [respuestas]
+            resEncuestas x listaparametros
+    else do 
+        return y
+
 main :: IO ()
 main = do
-    x <- encuestas [[["el presidente es imbecil?"],["si","no"]],[["el presidente es imbecil?"],["si","no"]]]
-    let n = length x
-    let indices = [0..n-1]
+    --x <- resEncuesta [["el presidente es imbecil?"],["si","no"],["es funcional?"],["si","no","talvez"]] [] 1
+    
+    --Lista de encuestas y una lista de indices
 
-    print (x)
-    print (indices)
-    putStr ""
+    x <- encuestas [[["el presidente es imbecil?"],["si","no"]]]
+    y <- resEncuestas x []
+    print(y)
+
+{-
+print (indices)
+
+    
+-}
+    
+
 
 
    
