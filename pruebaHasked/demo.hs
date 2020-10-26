@@ -47,7 +47,7 @@ respuestas lista = do
 
 respuestasTipo2 :: [String] -> Int -> IO [String]
 respuestasTipo2 lista x = do
-    if (x == 4) 
+    if (x == 5) 
         then do
             return (lista)
         else do
@@ -73,7 +73,6 @@ recibir = do
   x <- getLine
   return([x])
 
-
 resPregunta :: [String] -> [String] -> IO [String]
 resPregunta enun opc = do
     print(enun)
@@ -84,19 +83,38 @@ resPregunta enun opc = do
     let numRes = read res :: Int
     return([opc !! numRes])
 
-resEncuesta ::  [[String]] -> [String]-> Int -> IO [String]
-resEncuesta x y z= do
+resPreguntaRandom ::  [String] -> IO [String]
+resPreguntaRandom opc = do
+    return [opc !! 0]
+
+
+resEncuesta ::  [[String]] -> [String]-> Int -> Int -> IO [String]
+resEncuesta x y z a= do
     let pregunta = x!!0
     let opciones = x!!1
-    respuesta <- resPregunta pregunta opciones
-    let lista = y ++ respuesta
-    let listaparametro = tail x
-    let listaparametro2 = tail listaparametro
-    if (listaparametro2 /= [])
+    if (a == 0)
         then do
-            resEncuesta listaparametro2 lista z
-            else do
-                return (lista ++ [show z])
+            respuesta <- resPregunta pregunta opciones
+            let lista = y ++ respuesta
+            let listaparametro = tail x
+            let listaparametro2 = tail listaparametro
+            if (listaparametro2 /= [])
+                then do
+                    resEncuesta listaparametro2 lista z a
+                else do
+                    return (lista ++ [show z])
+    else do
+            respuesta <- resPreguntaRandom opciones
+            let lista = y ++ respuesta
+            let listaparametro = tail x
+            let listaparametro2 = tail listaparametro
+            if (listaparametro2 /= [])
+                then do
+                    resEncuesta listaparametro2 lista z a
+                else do
+                    return (lista ++ [show z])
+
+    
 
 resEncuestas :: [[[String]]] -> [[String]] -> IO [[String]] 
 resEncuestas x y = do 
@@ -104,29 +122,73 @@ resEncuestas x y = do
     condicion <- getLine
     if(condicion == "+")
         then do 
+            putStrLn "Digite el numero de encuesta que desea responder"
             strnum <- getLine
             let numencuesta = read strnum :: Int
             let encuesta = x !! numencuesta
-            respuestas <- resEncuesta encuesta [] numencuesta
-            let listaparametros = y ++ [respuestas]
-            resEncuestas x listaparametros
+            putStrLn "0: Respuesta manual || 1: Respuesta automatica"
+            tipoRespuesta <- getLine
+            if(tipoRespuesta == "0") 
+                then do
+                    respuestas <- resEncuesta encuesta [] numencuesta 0
+                    let listaparametros = y ++ [respuestas]
+                    resEncuestas x listaparametros
+            else do
+                    respuestas <- resEncuesta encuesta [] numencuesta 1
+                    let listaparametros = y ++ [respuestas]
+                    resEncuestas x listaparametros
     else do 
         return y
+
+cantResXKesimaEncuesta :: [[String]] -> Int -> Int -> Int  
+cantResXKesimaEncuesta lista ind cant = do 
+    if(lista == [])
+        then do
+            cant
+    else do
+        let cabeza = head lista
+        if(head (reverse (cabeza)) == show ind)
+            then do
+                let num = cant + 1
+                cantResXKesimaEncuesta (tail lista) ind num
+            else do
+                cantResXKesimaEncuesta (tail lista) ind cant
+            
+
+cantResPorEncuesta:: [[String]] -> Int -> [Int]
+cantResPorEncuesta res tam = do
+    let listaIndices = [0..tam-1]
+    let resultado = map (\x -> cantResXKesimaEncuesta (res) x 0) listaIndices 
+    resultado
+
 
 main :: IO ()
 main = do
     --x <- resEncuesta [["el presidente es imbecil?"],["si","no"],["es funcional?"],["si","no","talvez"]] [] 1
     
-    --Lista de encuestas y una lista de indices
+    --Lista de encuestas 
 
-    x <- encuestas [[["el presidente es imbecil?"],["si","no"]]]
+    x <- encuestas [[["el presidente es imbecil?"],["si","no"],["es inteligente?"],["si","no"], ["cuanto le queda?"],["10","2"]],
+                    [["que edad tiene binns"],["18","90"],["es inteligente?"],["si","no"], ["ya va a terminar?"],["si","no"]]]
+
+    --respuestas de las encuestas
     y <- resEncuestas x []
-    print(y)
+    
+    --Cant de encuestas realizadas
+    putStr "Cantidad de encuestas realizadas: "
+    print(length x)
+
+    --cant respuestas por encuesta
+    putStrLn "Cant de respuestas por cada encuesta: "
+    let z = cantResPorEncuesta y (length x)
+    print(z)
+
+    --cant total de respuestas
+    putStr "Cantidad total de respuestas: "
+    print(length y)
 
 {-
-print (indices)
-
-    
+    print (indices)
 -}
     
 
