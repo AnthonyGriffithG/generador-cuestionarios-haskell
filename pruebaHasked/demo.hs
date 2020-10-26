@@ -58,9 +58,9 @@ respuestasTipo2 lista x = do
 
 encuestas :: [[[String]]] -> IO [[[String]]]
 encuestas lista = do
-    putStrLn $ "Inserte + para insertar otra encuesta, o cualquier otro caracter para terminar encuesta:"
+    putStrLn $ "1. Insertar encuesta  2. Volver menu"
     l <- getLine
-    if (l /= "+") 
+    if (l /= "1") 
         then do
             return (lista)
         else do
@@ -91,7 +91,9 @@ resPreguntaRandom opc = do
 resEncuesta ::  [[String]] -> [String]-> Int -> Int -> IO [String]
 resEncuesta x y z a= do
     let pregunta = x!!0
+    putStr "aqui"
     let opciones = x!!1
+    putStr "aqui2"
     if (a == 0)
         then do
             respuesta <- resPregunta pregunta opciones
@@ -161,35 +163,50 @@ cantResPorEncuesta res tam = do
     let resultado = map (\x -> cantResXKesimaEncuesta (res) x 0) listaIndices 
     resultado
 
+menu :: [[[String]]] -> [[String]] -> IO Int
+menu enc res = do
+    putStrLn "~~~~~~~~~~ Generador de FORMS ~~~~~~~~~~"
+    putStrLn "Hecho por: Anthony Griffith"
+
+    putStrLn "Opciones:"
+    putStrLn "1. Crear encuesta         2. Responder"
+    putStrLn ""
+    putStrLn "3. Ver estadisticas       4. Finalizar"
+    putStrLn ""
+    putStrLn "Digite el indice de la opcion que desea realizar: "
+
+    x <- getLine
+    if(x == "1") then do 
+        newEnc <- encuestas enc
+        menu newEnc res 
+    else if(x == "2") then do
+        newRes <- resEncuestas enc res
+        menu enc newRes
+    else if(x == "3") then do
+        putStr "Cantidad de encuestas realizadas: "
+        print(length enc)
+        putStrLn ""
+
+        putStr "Cantidad de respuestas por cada encuesta: "
+        let z = cantResPorEncuesta res (length enc)
+        print(z)
+        putStrLn ""
+
+        putStr "Cantidad total de respuestas: "
+        print(length res)
+        putStrLn ""
+
+        menu enc res 
+    else do
+        return 0
+
 
 main :: IO ()
 main = do
-    --x <- resEncuesta [["el presidente es imbecil?"],["si","no"],["es funcional?"],["si","no","talvez"]] [] 1
+    menu [[["el presidente es imbecil?"],["si","no"],["es inteligente?"],["si","no"], ["cuanto le queda?"],["10","2"]],
+         [["que edad tiene binns"],["18","90"],["es inteligente?"],["si","no"], ["ya va a terminar?"],["si","no"]]] []
+    print("")
     
-    --Lista de encuestas 
-
-    x <- encuestas [[["el presidente es imbecil?"],["si","no"],["es inteligente?"],["si","no"], ["cuanto le queda?"],["10","2"]],
-                    [["que edad tiene binns"],["18","90"],["es inteligente?"],["si","no"], ["ya va a terminar?"],["si","no"]]]
-
-    --respuestas de las encuestas
-    y <- resEncuestas x []
-    
-    --Cant de encuestas realizadas
-    putStr "Cantidad de encuestas realizadas: "
-    print(length x)
-
-    --cant respuestas por encuesta
-    putStrLn "Cant de respuestas por cada encuesta: "
-    let z = cantResPorEncuesta y (length x)
-    print(z)
-
-    --cant total de respuestas
-    putStr "Cantidad total de respuestas: "
-    print(length y)
-
-{-
-    print (indices)
--}
     
 
 
