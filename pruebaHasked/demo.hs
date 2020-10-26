@@ -11,18 +11,18 @@ addQuestions x y = x ++ y
 
 preguntas :: [[String]] -> IO [[String]]
 preguntas lista = do
-    putStrLn $ "Inserte + para insertar otra pregunta, o cualquier otro caracter para terminar preguntas:"
+    putStrLn $ "1. Insertar pregunta || 2. Terminar preguntas"
     l <- getLine
-    if (l /= "+") 
+    if (l /= "1") 
         then do
             return (lista)
         else do
             putStrLn $ "Inserte la pregunta"
             z <- recibir
             
-            putStrLn $ "Inserte 1 para tipo de preguntas de escala, o 0 para preguntas normales"
+            putStrLn $ "1. Opciones tipo escala || 2. Opciones normales"
             tipoPregunta <- getLine
-            if(tipoPregunta == "0")
+            if(tipoPregunta == "2")
               then do
                 listaRespuestas <- respuestas []
                 let lista2 = lista ++ [z] ++ [listaRespuestas]
@@ -34,13 +34,13 @@ preguntas lista = do
     
 respuestas :: [String] -> IO [String]
 respuestas lista = do
-    putStrLn $ "Inserte + para insertar otra respuesta, o cualquier otro caracter para terminar respuesta:"
+    putStrLn $ "1. Insertar opcion || 2. Terminar opciones"
     l <- getLine
-    if (l /= "+") 
+    if (l /= "1") 
         then do
             return (lista)
         else do
-            putStrLn $ "Inserte la respuesta"
+            putStrLn $ "Inserte la opcion"
             z <- recibir
             let lista2 = lista ++ z
             respuestas  lista2
@@ -51,22 +51,16 @@ respuestasTipo2 lista x = do
         then do
             return (lista)
         else do
-            putStrLn $ "Inserte la " ++ show x ++ " respuesta"
+            putStrLn $ "Inserte la " ++ show (x+1) ++ " opcion"
             z <- recibir
             let lista2 = lista ++ z
             respuestasTipo2 lista2 (x+1)
 
 encuestas :: [[[String]]] -> IO [[[String]]]
 encuestas lista = do
-    putStrLn $ "1. Insertar encuesta  2. Volver menu"
-    l <- getLine
-    if (l /= "1") 
-        then do
-            return (lista)
-        else do
-            listaPreguntas <- preguntas []
-            let lista2 = lista ++ [listaPreguntas]
-            encuestas  lista2 
+        listaPreguntas <- preguntas []
+        let lista2 = lista ++ [listaPreguntas]
+        return lista2
 
 recibir :: IO [String]
 recibir = do
@@ -120,27 +114,22 @@ resEncuesta x y z a= do
 
 resEncuestas :: [[[String]]] -> [[String]] -> IO [[String]] 
 resEncuestas x y = do 
-    putStrLn "Digite + para responder una encuesta"
-    condicion <- getLine
-    if(condicion == "+")
-        then do 
-            putStrLn "Digite el numero de encuesta que desea responder"
-            strnum <- getLine
-            let numencuesta = read strnum :: Int
-            let encuesta = x !! numencuesta
-            putStrLn "0: Respuesta manual || 1: Respuesta automatica"
-            tipoRespuesta <- getLine
-            if(tipoRespuesta == "0") 
-                then do
-                    respuestas <- resEncuesta encuesta [] numencuesta 0
-                    let listaparametros = y ++ [respuestas]
-                    resEncuestas x listaparametros
-            else do
-                    respuestas <- resEncuesta encuesta [] numencuesta 1
-                    let listaparametros = y ++ [respuestas]
-                    resEncuestas x listaparametros
-    else do 
-        return y
+    putStrLn "Digite el numero de encuesta que desea responder"
+    strnum <- getLine
+    let numencuesta = read strnum :: Int
+    let encuesta = x !! numencuesta
+    putStrLn "1. Respuesta manual || 2. Respuesta automatica"
+    tipoRespuesta <- getLine
+    if(tipoRespuesta == "1") 
+        then do
+            respuestas <- resEncuesta encuesta [] numencuesta 0
+            let listaparametros = y ++ [respuestas]
+            return listaparametros
+    else do
+            respuestas <- resEncuesta encuesta [] numencuesta 1
+            let listaparametros = y ++ [respuestas]
+            return listaparametros
+    
 
 cantResXKesimaEncuesta :: [[String]] -> Int -> Int -> Int  
 cantResXKesimaEncuesta lista ind cant = do 
