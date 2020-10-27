@@ -1,3 +1,4 @@
+
 --Obtener por teclado
 input :: String -> IO String
 input prompt = do
@@ -83,7 +84,7 @@ resPreguntaRandom opc = do
 
 
 resEncuesta ::  [[String]] -> [String]-> Int -> Int -> IO [String]
-resEncuesta x y z a= do
+resEncuesta x y z a = do
     let pregunta = x!!0
     putStr "aqui"
     let opciones = x!!1
@@ -187,6 +188,9 @@ menu enc res = do
 
         menu enc res 
     else do
+        mapM_ (appendFile "encuestas.txt" . show) [enc]
+        mapM_ (appendFile "answers.txt" . show) [res]
+
         return 0
 
 
