@@ -25,7 +25,7 @@ preguntas lista = do
             tipoPregunta <- getLine
             if(tipoPregunta == "2")
               then do
-                listaRespuestas <- respuestas []
+                listaRespuestas <- respuestas [] 1
                 let lista2 = lista ++ [z] ++ [listaRespuestas]
                 preguntas  lista2 
               else do
@@ -33,8 +33,8 @@ preguntas lista = do
                 let lista2 = lista ++ [z] ++ [listaRespuestas]
                 preguntas lista2
     
-respuestas :: [String] -> IO [String]
-respuestas lista = do
+respuestas :: [String] -> Int -> IO [String]
+respuestas lista cont = do
     putStrLn $ "1. Insertar opcion || 2. Terminar opciones"
     l <- getLine
     if (l /= "1") 
@@ -43,8 +43,9 @@ respuestas lista = do
         else do
             putStrLn $ "Inserte la opcion"
             z <- recibir
-            let lista2 = lista ++ z
-            respuestas  lista2
+            let opcion = show cont ++ ". " ++ z!!0
+            let lista2 = lista ++ [opcion]
+            respuestas  lista2 (cont + 1)
 
 respuestasTipo2 :: [String] -> Int -> IO [String]
 respuestasTipo2 lista x = do
@@ -54,7 +55,9 @@ respuestasTipo2 lista x = do
         else do
             putStrLn $ "Inserte la " ++ show (x+1) ++ " opcion"
             z <- recibir
-            let lista2 = lista ++ z
+            let numOpcion = x + 1
+            let opcion = show numOpcion ++ ". " ++ z!!0
+            let lista2 = lista ++ [opcion]
             respuestasTipo2 lista2 (x+1)
 
 encuestas :: [[[String]]] -> IO [[[String]]]
@@ -76,7 +79,7 @@ resPregunta enun opc = do
 
     res <- getLine
     let numRes = read res :: Int
-    return([opc !! numRes])
+    return([opc !! (numRes-1)])
 
 resPreguntaRandom ::  [String] -> IO [String]
 resPreguntaRandom opc = do
@@ -86,9 +89,7 @@ resPreguntaRandom opc = do
 resEncuesta ::  [[String]] -> [String]-> Int -> Int -> IO [String]
 resEncuesta x y z a = do
     let pregunta = x!!0
-    putStr "aqui"
     let opciones = x!!1
-    putStr "aqui2"
     if (a == 0)
         then do
             respuesta <- resPregunta pregunta opciones
@@ -113,21 +114,22 @@ resEncuesta x y z a = do
 
     
 
-resEncuestas :: [[[String]]] -> [[String]] -> IO [[String]] 
-resEncuestas x y = do 
+resEncuestas :: [[[String]]] -> [[String]] -> [String] -> IO [[String]] 
+resEncuestas x y nombres = do 
+    print(nombres)
     putStrLn "Digite el numero de encuesta que desea responder"
     strnum <- getLine
     let numencuesta = read strnum :: Int
-    let encuesta = x !! numencuesta
+    let encuesta = x !! (numencuesta-1)
     putStrLn "1. Respuesta manual || 2. Respuesta automatica"
     tipoRespuesta <- getLine
     if(tipoRespuesta == "1") 
         then do
-            respuestas <- resEncuesta encuesta [] numencuesta 0
+            respuestas <- resEncuesta encuesta [] (numencuesta-1) 0
             let listaparametros = y ++ [respuestas]
             return listaparametros
     else do
-            respuestas <- resEncuesta encuesta [] numencuesta 1
+            respuestas <- resEncuesta encuesta [] (numencuesta-1) 1
             let listaparametros = y ++ [respuestas]
             return listaparametros
     
@@ -146,15 +148,14 @@ cantResXKesimaEncuesta lista ind cant = do
             else do
                 cantResXKesimaEncuesta (tail lista) ind cant
             
-
 cantResPorEncuesta:: [[String]] -> Int -> [Int]
 cantResPorEncuesta res tam = do
     let listaIndices = [0..tam-1]
     let resultado = map (\x -> cantResXKesimaEncuesta (res) x 0) listaIndices 
     resultado
 
-menu :: [[[String]]] -> [[String]] -> IO Int
-menu enc res = do
+menu :: [[[String]]] -> [[String]] -> [String] -> Int -> IO Int
+menu enc res nom cont = do
     putStrLn "~~~~~~~~~~ Generador de FORMS ~~~~~~~~~~"
     putStrLn "Hecho por: Anthony Griffith"
 
@@ -167,11 +168,18 @@ menu enc res = do
 
     x <- getLine
     if(x == "1") then do 
+        putStrLn "Inserte el nombre de la encuesta"
+        nombre <- recibir
+        let nombreReal = nombre!!0
+        let numero = show (cont+1) ++ ". "
+        let newNombre = numero ++ nombreReal
+        let newNom = nom ++ [newNombre]
         newEnc <- encuestas enc
-        menu newEnc res 
+        let newCont = cont + 1
+        menu newEnc res newNom newCont
     else if(x == "2") then do
-        newRes <- resEncuestas enc res
-        menu enc newRes
+        newRes <- resEncuestas enc res nom
+        menu enc newRes nom cont
     else if(x == "3") then do
         putStr "Cantidad de encuestas realizadas: "
         print(length enc)
@@ -186,19 +194,20 @@ menu enc res = do
         print(length res)
         putStrLn ""
 
-        menu enc res 
+        putStrLn "Inserte cualquier tecla para volver al menu"
+        getLine
+        menu enc res nom cont
     else do
         mapM_ (appendFile "encuestas.txt" . show) [enc]
         mapM_ (appendFile "answers.txt" . show) [res]
 
         return 0
-
-
+        
 main :: IO ()
 main = do
-    menu [[["el presidente es imbecil?"],["si","no"],["es inteligente?"],["si","no"], ["cuanto le queda?"],["10","2"]],
-         [["que edad tiene binns"],["18","90"],["es inteligente?"],["si","no"], ["ya va a terminar?"],["si","no"]]] []
-    print("")
+    menu [[["Como ha sido la administracion del presidente?"],["1. buena","2. mala"],["Esta Costa Rica en crisis"],["1. si","2. no"], ["Que tal esta la situacion?"],["1. pesimo","2. mal", "3. regular", "4. buena", "5. excelente"]],
+         [["Que tan buenas son las clases"],["1. Muy malas","2. Malas", "3. Regulares", "4. Buenas", "5. Excelentes"],["Le gusta el modo virtual"],["1. si","2. no"], ["Desea volver a clases presenciales"],["1. si","2. no"]]] [] ["1. Situacion del pais","2. Clases virtuales"] 2
+    putStr ""
     
     
 
