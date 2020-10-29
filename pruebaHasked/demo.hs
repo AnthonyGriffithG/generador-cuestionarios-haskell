@@ -9,6 +9,8 @@ input prompt = do
 addQuestions :: [a] -> [a] -> [a]
 addQuestions x y = x ++ y
 
+--En la siguiente parte lo que se hara es crear las listas de encuestas, las cuales 
+--incluyen preguntas y respuestas cada una.
 
 preguntas :: [[String]] -> IO [[String]]
 preguntas lista = do
@@ -66,11 +68,13 @@ encuestas lista = do
         let lista2 = lista ++ [listaPreguntas]
         return lista2
 
+--Funcion para recibir un input y devolverlo en lista.
 recibir :: IO [String]
 recibir = do
   x <- getLine
   return([x])
 
+--A partir de aca se realizan las funciones necesarias para lograr responder a las encuestas.
 resPregunta :: [String] -> [String] -> IO [String]
 resPregunta enun opc = do
     print(enun)
@@ -133,7 +137,7 @@ resEncuestas x y nombres = do
             let listaparametros = y ++ [respuestas]
             return listaparametros
     
-
+--A partir de este punto se realizan algunas funciones para realizar estadisticas
 cantResXKesimaEncuesta :: [[String]] -> Int -> Int -> Int  
 cantResXKesimaEncuesta lista ind cant = do 
     if(lista == [])
@@ -154,6 +158,7 @@ cantResPorEncuesta res tam = do
     let resultado = map (\x -> cantResXKesimaEncuesta (res) x 0) listaIndices 
     resultado
 
+--Funcion principal, la cual consiste en un menu que le permite al usuario realizar distintas opciones.
 menu :: [[[String]]] -> [[String]] -> [String] -> Int -> IO Int
 menu enc res nom cont = do
     putStrLn "~~~~~~~~~~ Generador de FORMS ~~~~~~~~~~"
@@ -205,6 +210,7 @@ menu enc res nom cont = do
         
 main :: IO ()
 main = do
+    --Se envian dos listas quemadas para prueba.
     menu [[["Como ha sido la administracion del presidente?"],["1. buena","2. mala"],["Esta Costa Rica en crisis"],["1. si","2. no"], ["Que tal esta la situacion?"],["1. pesimo","2. mal", "3. regular", "4. buena", "5. excelente"]],
          [["Que tan buenas son las clases"],["1. Muy malas","2. Malas", "3. Regulares", "4. Buenas", "5. Excelentes"],["Le gusta el modo virtual"],["1. si","2. no"], ["Desea volver a clases presenciales"],["1. si","2. no"]]] [] ["1. Situacion del pais","2. Clases virtuales"] 2
     putStr ""
